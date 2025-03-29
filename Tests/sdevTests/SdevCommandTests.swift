@@ -96,6 +96,37 @@ final class SdevCommandTests: XCTestCase {
         XCTAssertTrue(output.contains("Line 2:"))
     }
     
+    func testFileDiffWithIgnoreCase() throws {
+        // Create two temporary files with different case
+        let tempDir = FileManager.default.temporaryDirectory
+        let file1Path = tempDir.appendingPathComponent("file1.txt").path
+        let file2Path = tempDir.appendingPathComponent("file2.txt").path
+        
+        try "Line 1\nLine 2\nLine 3".write(toFile: file1Path, atomically: true, encoding: .utf8)
+        try "LINE 1\nLINE 2\nLINE 3".write(toFile: file2Path, atomically: true, encoding: .utf8)
+        
+        defer {
+            try? FileManager.default.removeItem(atPath: file1Path)
+            try? FileManager.default.removeItem(atPath: file2Path)
+        }
+        
+        // Without ignore-case flag should show differences
+        let processWithoutFlag = try runSdev(arguments: ["diff", file1Path, file2Path])
+        XCTAssertEqual(processWithoutFlag.terminationStatus, 0)
+        
+        let outputWithoutFlag = try getOutput(from: processWithoutFlag)
+        XCTAssertTrue(outputWithoutFlag.contains("< Line 1"))
+        XCTAssertTrue(outputWithoutFlag.contains("> LINE 1"))
+        
+        // With ignore-case flag should show no differences
+        let processWithFlag = try runSdev(arguments: ["diff", "--ignore-case", file1Path, file2Path])
+        XCTAssertEqual(processWithFlag.terminationStatus, 0)
+        
+        let outputWithFlag = try getOutput(from: processWithFlag)
+        XCTAssertFalse(outputWithFlag.contains("< Line 1"))
+        XCTAssertFalse(outputWithFlag.contains("> LINE 1"))
+    }
+    
     // Helper method to run the executable
     private func runSdev(arguments: [String] = []) throws -> Process {
         // Find the executable path

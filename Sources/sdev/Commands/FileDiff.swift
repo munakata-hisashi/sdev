@@ -16,8 +16,8 @@ struct FileDiff: ParsableCommand {
     @Flag(name: .shortAndLong, help: "Show line numbers")
     var lineNumbers: Bool = false
     
-    @Flag(name: [.customShort("c"), .long], help: "Compare case sensitively")
-    var caseSensitive: Bool = false
+    @Flag(name: [.customShort("i"), .long], help: "Ignore case when comparing")
+    var ignoreCase: Bool = false
     
     func run() throws {
         let fileManager = FileManager.default
@@ -56,10 +56,10 @@ struct FileDiff: ParsableCommand {
                 let line2 = lines2[i]
                 
                 let areEqual: Bool
-                if caseSensitive {
-                    areEqual = line1 == line2
-                } else {
+                if ignoreCase {
                     areEqual = line1.lowercased() == line2.lowercased()
+                } else {
+                    areEqual = line1 == line2
                 }
                 
                 if !areEqual {
