@@ -10,7 +10,8 @@ struct SdevCommand: ParsableCommand {
         commandName: "sdev",
         abstract: "A developer utility tool",
         subcommands: [
-            Greeting.self
+            Greeting.self,
+            FileDiff.self
         ],
         defaultSubcommand: Greeting.self
     )
