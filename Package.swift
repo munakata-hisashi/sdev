@@ -15,7 +15,8 @@ let package = Package(
             name: "sdev",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-            ]),
+            ],
+            path: "Sources/sdev"),
         .testTarget(
             name: "sdevTests",
             dependencies: [
