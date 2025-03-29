@@ -5,35 +5,35 @@ import Foundation
 
 final class SdevCommandTests: XCTestCase {
     func testHelp() throws {
-        let process = try runSdev(arguments: ["--help"])
+        let process = try TestHelpers.runSdev(arguments: ["--help"])
         XCTAssertEqual(process.terminationStatus, 0)
         
-        let output = try getOutput(from: process)
+        let output = try TestHelpers.getOutput(from: process)
         XCTAssertTrue(output.contains("OVERVIEW:"))
         XCTAssertTrue(output.contains("A developer utility tool"))
     }
     
     func testGreetingCommand() throws {
-        let process = try runSdev(arguments: ["greeting"])
+        let process = try TestHelpers.runSdev(arguments: ["greeting"])
         XCTAssertEqual(process.terminationStatus, 0)
         
-        let output = try getOutput(from: process)
+        let output = try TestHelpers.getOutput(from: process)
         XCTAssertEqual(output.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines), "Hello, world!")
     }
     
     func testNoArguments() throws {
-        let process = try runSdev(arguments: [])
+        let process = try TestHelpers.runSdev(arguments: [])
         XCTAssertEqual(process.terminationStatus, 0)
         
-        let output = try getOutput(from: process)
+        let output = try TestHelpers.getOutput(from: process)
         XCTAssertEqual(output.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines), "Hello, world!")
     }
     
     func testFileDiffHelp() throws {
-        let process = try runSdev(arguments: ["diff", "--help"])
+        let process = try TestHelpers.runSdev(arguments: ["diff", "--help"])
         XCTAssertEqual(process.terminationStatus, 0)
         
-        let output = try getOutput(from: process)
+        let output = try TestHelpers.getOutput(from: process)
         XCTAssertTrue(output.contains("OVERVIEW:"))
         XCTAssertTrue(output.contains("Displays the difference between two files"))
     }
@@ -44,11 +44,11 @@ final class SdevCommandTests: XCTestCase {
     func testFileDiffMissingFiles() throws {
         let tempDir = FileManager.default.temporaryDirectory
         let nonExistentFile = tempDir.appendingPathComponent(UUID().uuidString).path
-        let process = try runSdev(arguments: ["diff", nonExistentFile, nonExistentFile])
+        let process = try TestHelpers.runSdev(arguments: ["diff", nonExistentFile, nonExistentFile])
         
         XCTAssertNotEqual(process.terminationStatus, 0)
         
-        let output = try getOutput(from: process)
+        let output = try TestHelpers.getOutput(from: process)
         XCTAssertTrue(output.contains("Error:") && output.contains("File not found"))
     }
     */
@@ -67,10 +67,10 @@ final class SdevCommandTests: XCTestCase {
             try? FileManager.default.removeItem(atPath: file2Path)
         }
         
-        let process = try runSdev(arguments: ["diff", file1Path, file2Path])
+        let process = try TestHelpers.runSdev(arguments: ["diff", file1Path, file2Path])
         XCTAssertEqual(process.terminationStatus, 0)
         
-        let output = try getOutput(from: process)
+        let output = try TestHelpers.getOutput(from: process)
         XCTAssertTrue(output.contains("< Line 2"))
         XCTAssertTrue(output.contains("> Modified Line"))
     }
@@ -89,10 +89,10 @@ final class SdevCommandTests: XCTestCase {
             try? FileManager.default.removeItem(atPath: file2Path)
         }
         
-        let process = try runSdev(arguments: ["diff", "--line-numbers", file1Path, file2Path])
+        let process = try TestHelpers.runSdev(arguments: ["diff", "--line-numbers", file1Path, file2Path])
         XCTAssertEqual(process.terminationStatus, 0)
         
-        let output = try getOutput(from: process)
+        let output = try TestHelpers.getOutput(from: process)
         XCTAssertTrue(output.contains("Line 2:"))
     }
     
@@ -111,56 +111,19 @@ final class SdevCommandTests: XCTestCase {
         }
         
         // Without ignore-case flag should show differences
-        let processWithoutFlag = try runSdev(arguments: ["diff", file1Path, file2Path])
+        let processWithoutFlag = try TestHelpers.runSdev(arguments: ["diff", file1Path, file2Path])
         XCTAssertEqual(processWithoutFlag.terminationStatus, 0)
         
-        let outputWithoutFlag = try getOutput(from: processWithoutFlag)
+        let outputWithoutFlag = try TestHelpers.getOutput(from: processWithoutFlag)
         XCTAssertTrue(outputWithoutFlag.contains("< Line 1"))
         XCTAssertTrue(outputWithoutFlag.contains("> LINE 1"))
         
         // With ignore-case flag should show no differences
-        let processWithFlag = try runSdev(arguments: ["diff", "--ignore-case", file1Path, file2Path])
+        let processWithFlag = try TestHelpers.runSdev(arguments: ["diff", "--ignore-case", file1Path, file2Path])
         XCTAssertEqual(processWithFlag.terminationStatus, 0)
         
-        let outputWithFlag = try getOutput(from: processWithFlag)
+        let outputWithFlag = try TestHelpers.getOutput(from: processWithFlag)
         XCTAssertFalse(outputWithFlag.contains("< Line 1"))
         XCTAssertFalse(outputWithFlag.contains("> LINE 1"))
-    }
-    
-    // Helper method to run the executable
-    private func runSdev(arguments: [String] = []) throws -> Process {
-        // Find the executable path
-        let sdevBinary = productsDirectory.appendingPathComponent("sdev")
-        
-        let process = Process()
-        process.executableURL = sdevBinary
-        process.arguments = arguments
-        
-        let outputPipe = Pipe()
-        process.standardOutput = outputPipe
-        
-        try process.run()
-        process.waitUntilExit()
-        
-        return process
-    }
-    
-    // Helper to get output from process
-    private func getOutput(from process: Process) throws -> String {
-        let outputPipe = process.standardOutput as! Pipe
-        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-        return String(data: outputData, encoding: .utf8) ?? ""
-    }
-    
-    /// Returns path to the built products directory.
-    private var productsDirectory: URL {
-        #if os(macOS)
-        for bundle in Bundle.allBundles where bundle.bundlePath.hasSuffix(".xctest") {
-            return bundle.bundleURL.deletingLastPathComponent()
-        }
-        fatalError("couldn't find the products directory")
-        #else
-        return Bundle.main.bundleURL
-        #endif
     }
 }
