@@ -13,8 +13,8 @@ final class SdevCommandTests: XCTestCase {
         XCTAssertTrue(output.contains("A developer utility tool"))
     }
     
-    func testGreeting() throws {
-        let process = try runSdev(arguments: ["--greeting"])
+    func testGreetingCommand() throws {
+        let process = try runSdev(arguments: ["greeting"])
         XCTAssertEqual(process.terminationStatus, 0)
         
         let output = try getOutput(from: process)
@@ -26,7 +26,7 @@ final class SdevCommandTests: XCTestCase {
         XCTAssertEqual(process.terminationStatus, 0)
         
         let output = try getOutput(from: process)
-        XCTAssertEqual(output.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines), "Run with --greeting to see a greeting message")
+        XCTAssertEqual(output.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines), "Hello, world!")
     }
     
     // Helper method to run the executable
