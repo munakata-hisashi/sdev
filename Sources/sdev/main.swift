@@ -11,7 +11,8 @@ struct SdevCommand: ParsableCommand {
         abstract: "A developer utility tool",
         subcommands: [
             Greeting.self,
-            FileDiff.self
+            FileDiff.self,
+            UnixTime.self
         ],
         defaultSubcommand: Greeting.self
     )

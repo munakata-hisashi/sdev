@@ -1,5 +1,10 @@
 # CLAUDE.md for sdev
 
+## Workflow Guidelines
+- Create a new branch before implementing new features: `git checkout -b feature/<feature-name>`
+- Use descriptive branch names that reflect the feature or fix
+- Commit changes with clear, concise messages
+
 ## Build Commands
 - Build: `swift build`
 - Release build: `swift build -c release`
@@ -27,6 +32,11 @@
 ---
 
 # CLAUDE.md（日本語訳）
+
+## ワークフローガイドライン
+- 新機能を実装する前に新しいブランチを作成: `git checkout -b feature/<機能名>`
+- 機能や修正内容を反映した説明的なブランチ名を使用
+- 明確で簡潔なメッセージでコミット
 
 ## ビルドコマンド
 - ビルド: `swift build`
